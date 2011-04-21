@@ -18,22 +18,29 @@ function initialize_map(points) {
 	  });
   }
   google.maps.event.addListener(map, 'click', function(event) {
+	$( "#dialog" ).dialog({modal:true});
+	var form = $("new_location_form");
+	$("#location_lon").val(event.latLng.lng());
+	$("#location_lat").val(event.latLng.lat());	
     placeMarker(event.latLng);
+  });  
+
+  function postLocationToServer(event) {
 	$.ajax({
 	   type: "POST",
 	   url: "locations",
-	   data: "location[lat]="+event.latLng.lat()+"&location[lon]="+event.latLng.lng(),
+	   data: $(event.target).serialize(),
 	   success: function(msg){
 	     alert( "Data Saved: " + msg );
 	   }
-	 });
-  });  
+	 });	
+  }
   // Try W3C Geolocation method (Preferred)
   if(navigator.geolocation) {
     browserSupportFlag = true;
     navigator.geolocation.getCurrentPosition(function(position) {
       initialLocation = new google.maps.LatLng(position.coords.latitude,position.coords.longitude);
-      contentString = "Location found using W3C standard";
+      contentString = "Welcome. Please click on a location to save it";
       map.setCenter(initialLocation);
       infowindow.setContent(contentString);
       infowindow.setPosition(initialLocation);
@@ -84,3 +91,10 @@ function placeMarker(location) {
   console.log(location);
   map.setCenter(location);
 }
+
+
+$(function() {
+	$("#new_location").submit(function(event) {
+		postLocationToServer(event);
+	});
+});
