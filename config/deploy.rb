@@ -1,5 +1,5 @@
 set :application, "my-location"
-set :repository,  "git@github.com:schowdhury/location_play.git"
+set :repository,  "git@github.com:schowdhury/locations.git"
 set :deploy_to,     "/var/www/rails/#{application}"
 set :rake, 'rake'
 set :scm, :git
