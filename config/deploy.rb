@@ -40,6 +40,9 @@ set :keep_releases, 5
 set :user, 'deploy'
 set :use_sudo, false
 
+after "deploy:symlink", "deploy:symlink_configs"
+after "deploy:symlink_configs", "deploy:symlink_bundle"
+
 namespace :deploy do
   task :migrations do
     run <<-CMD
@@ -47,9 +50,16 @@ namespace :deploy do
     CMD
   end
   
+  task :symlink_bundle, :roles => :app, :except => {:no_symlink => true} do
+      run <<-CMD
+        cd #{release_path} && ln -nfs #{shared_path}/vendor/bundle #{release_path}/vendor/bundle
+      CMD
+      run "source /etc/profile; rvm rvmrc trust #{release_path}; cd #{release_path} && bundle install --gemfile #{release_path}/Gemfile --path #{shared_path}/bundle --deployment --quiet --without development test "
+    end
+
   task :symlink_configs, :roles => :app, :except => {:no_symlink => true} do
     run <<-CMD
-      cd #{release_path} && ln -nfs #{shared_path}/config/database.yml #{release_path}/config/database.yml
+      cd #{release_path} && ln -s #{shared_path}/config/database.yml #{release_path}/config/database.yml
     CMD
   end
   
